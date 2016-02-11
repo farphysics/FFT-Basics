@@ -64,6 +64,7 @@ void radix2fft(double* __restrict__ x, double* __restrict__ y, const int m) // x
 	{
 	    lookupCos[e] = cos(-PI*e/p_l);
 	    lookupSin[e] = -sqrt(1-lookupCos[e]*lookupCos[e]);
+	    //sincos(PI*e/p_l, lookupSin+e, lookupCos+e);
 	}
 
 	for (s = 0; s < slimit; s++) // section
@@ -145,6 +146,7 @@ void radix2ifft(double* __restrict__ x, double* __restrict__ y, const int m) // 
 	{
 	    lookupCos[e] = cos(PI*e/p_l);
 	    lookupSin[e] = sqrt(1-lookupCos[e]*lookupCos[e]);
+	    //sincos(PI*e/p_l, lookupSin+e, lookupCos+e);
 	}
 
 	for (s = 0; s < slimit; s++) // section
@@ -179,8 +181,8 @@ void radix2ifft(double* __restrict__ x, double* __restrict__ y, const int m) // 
 
 int main (int argc, char *argv[])
 {
-    const int m = 22,
-	N = power2(m);
+    const int m = 22; 
+    const int N = power2(m);
     double* x = new double[N];
     double* y = new double[N];
 
@@ -195,21 +197,28 @@ int main (int argc, char *argv[])
     //for (int i = 0; i < N; i++) std::cout<<x[i]<<" + i*"<<y[i]<<std::endl;
 
     radix2fft(x, y, m);
-    std::cout<<x[100]<<" + i*"<<y[100]<<std::endl;
 
     //radix2ifft(x, y, m);
+    
+    std::cout<<x[100]<<" + i*"<<y[100]<<std::endl;
 
     //for (int i = 0; i < N; i++) std::cout<<x[i]<<" + i*"<<y[i]<<std::endl;
 
+    //for (int i = 0; i < N; i++) std::cout<<x[i]<<" + i*"<<y[i]<<std::endl;
+    /*for (int i = 0; i < 10; i++) std::cout<<x[i]<<" + i*"<<y[i]<<std::endl;
+    for (int i = 1900; i < 1910; i++) std::cout<<x[i]<<" + i*"<<y[i]<<std::endl;
+    for (int i = N-10; i < N; i++) std::cout<<x[i]<<" + i*"<<y[i]<<std::endl;*/
+
     /*
     std::fstream fsR;
-    //std::fstream fsI;
+    std::fstream fsI;
     fsR.open("real.dat", std::fstream::in | std::fstream::out | std::fstream::trunc);
-    //fsI.open("imag.dat", std::fstream::in | std::fstream::out | std::fstream::trunc);
+    fsI.open("imag.dat", std::fstream::in | std::fstream::out | std::fstream::trunc);
+    
     for (int i = 0; i < N; i++)
     {
 	fsR<<i<<" "<<x[i]<<std::endl;
-	//fsI<<y[i]<<std::endl;
+	fsI<<i<<" "<<y[i]<<std::endl;
     }
     */
 

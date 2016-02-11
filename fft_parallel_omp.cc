@@ -1,5 +1,6 @@
 #include <math.h>
 #include <iostream>
+#include <omp.h>
 #define PI 3.141592653589793
 #define TWOPI 6.283185307179586
 
@@ -102,9 +103,9 @@ void radix2fft_p(double* __restrict__ x, double* __restrict__ y, const int p) //
     double* xtmp = new double[N];
     double* ytmp = new double[N];
 
-    int j, J, n;
-    double fsin, fcos;
+    int j, J;
 
+    #pragma omp parallel for
     for (j = 0; j < m; j++)
     {
 	// transpose
@@ -119,8 +120,11 @@ void radix2fft_p(double* __restrict__ x, double* __restrict__ y, const int p) //
     }
 
     // multiply by exp(-2*pi*i*j*J/N)
+    #pragma omp parallel for
     for (j = 0; j < m; j++)
     {
+	double fsin, fcos;
+	int n;
 	for (J = 0; J < M; J++)
 	{
 	    n = j*M + J;
@@ -130,6 +134,7 @@ void radix2fft_p(double* __restrict__ x, double* __restrict__ y, const int p) //
 	}
     }
 
+    #pragma omp parallel for
     for (J = 0; J < M; J++)
     {
 	for (j = 0; j < m; j++)
@@ -144,6 +149,7 @@ void radix2fft_p(double* __restrict__ x, double* __restrict__ y, const int p) //
     }
 
     // transpose
+    #pragma omp parallel for
     for (J = 0; J < M; J++)
     {
 	for (j = 0; j < m; j++)
@@ -170,8 +176,8 @@ int main(int argc, char *argv[])
     double w = 0.001;
     for (int n = 0; n < N; n++)
     {
-	x[n] = cos(w*n);
-	y[n] = sin(w*n);
+	x[n] = 0;//cos(w*n);
+	y[n] = 0;//sin(w*n);
     }
 
     radix2fft_p(x, y, p);

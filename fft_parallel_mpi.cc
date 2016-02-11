@@ -92,34 +92,24 @@ void radix2fft(double* __restrict__ x, double* __restrict__ y, const int m) // x
 } // end void radix2fft()
 
 
-int main(int argc, char *argv[])
+// parallel cooley-turkey algorithm
+void radix2fft_p(double* __restrict__ x, double* __restrict__ y, const int p) // x real data, y imaginary data, 2^p is signal length
 {
     // treat data of length N as m x M matrix with m*M = N
-    const int p = 22, // length of data = 2^p
-	N = power2(p),
+    int N = power2(p),
 	m_p = p/2,
 	m = power2(m_p),
 	M_p = p - m_p,
 	M = N/m;
-    double* x = new double[N];
-    double* y = new double[N];
     double* xtmp = new double[N];
     double* ytmp = new double[N];
 
     int j, J, n;
-    double fsin, fcos;
-
-    //-----DATA-----//
-    double w = 0.001;
-    for (n = 0; n < N; n++)
-    {
-	x[n] = cos(w*n);
-	y[n] = sin(w*n);
-    }
+    double arg, fsin, fcos;
 
     int  numtasks, rank;
 
-    MPI_Init(&argc, &argv);
+    MPI_Init(NULL, NULL);
 
     MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -243,17 +233,37 @@ int main(int argc, char *argv[])
 		y[j*M + J] = ytmp[J*m + j];
 	    }
 	}
-
-	std::cout<<x[100]<<" + i*"<<y[100]<<std::endl;
-	//for (int i = 0; i < N; i++) std::cout<<x[i]<<" + i*"<<y[i]<<std::endl;
     }
+
+    if (rank == 0) std::cout<<x[100]<<" + i*"<<y[100]<<std::endl;
 
     MPI_Finalize();
 
-    delete[] x;
-    delete[] y;
     delete[] xtmp;
     delete[] ytmp;
+
+} // end void radix2fft_p()
+
+
+int main(int argc, char *argv[])
+{
+    int p = 22, // length of data = 2^p
+	N = power2(p);
+    double* x = new double[N];
+    double* y = new double[N];
+
+    //-----DATA-----//
+    double w = 0.001;
+    for (int n = 0; n < N; n++)
+    {
+	x[n] = cos(w*n);
+	y[n] = sin(w*n);
+    }
+
+    radix2fft_p(x, y, p);
+
+    delete[] x;
+    delete[] y;
 
     return 0;
 }
