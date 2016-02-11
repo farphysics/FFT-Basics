@@ -32,8 +32,10 @@ def realfft(vector):
 
     return vector
 
+"""
 n = 2**18
 omega = 0.001
 t = np.arange(n)
 x = np.cos(omega*t)# + 1j*np.sin(omega*t)
 fft = realfft(x)
+"""
